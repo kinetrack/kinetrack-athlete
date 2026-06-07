@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0b0d0f">
+<title>KineTrack — Ma séance</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b0d0f;color:#f0f2f5;min-height:100vh;-webkit-text-size-adjust:100%}
+.aw{max-width:600px;margin:0 auto;padding:16px 14px 48px}
+
+/* Header séance */
+.ah{background:linear-gradient(135deg,#1a2535 0%,#1c2026 100%);border:1px solid rgba(79,156,249,0.2);border-radius:16px;padding:20px;margin-bottom:14px}
+.badge{display:inline-block;font-size:10px;font-weight:700;color:#22c77a;background:rgba(34,199,122,0.12);border:1px solid rgba(34,199,122,0.25);padding:3px 10px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+
+/* Carte exercice */
+.ec{background:#1c2026;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.ec-img{width:100%;max-height:220px;object-fit:cover;display:block}
+.ec-body{padding:16px}
+
+/* Pills infos */
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{background:#111316;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 10px;text-align:center;flex:1;min-width:56px}
+.pill-v{font-size:16px;font-weight:700;font-family:'Courier New',monospace;color:#4f9cf9}
+.pill-l{font-size:9px;color:#555d6a;text-transform:uppercase;margin-top:2px}
+
+/* Consigne */
+.consigne{font-size:12px;color:#8b929e;line-height:1.65;background:#111316;padding:10px 12px;border-radius:8px;margin-bottom:12px}
+.vid-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#0d1d2e;border:1px solid rgba(79,156,249,0.2);color:#4f9cf9;text-decoration:none;padding:11px;border-radius:8px;font-size:13px;margin-bottom:14px}
+
+/* Inputs */
+label{font-size:11px;color:#555d6a;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.inp{width:100%;background:#111316;border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px;color:#f0f2f5;font-size:22px;font-family:'Courier New',monospace;text-align:center;-webkit-appearance:none;transition:border-color .15s;outline:none}
+.inp:focus{border-color:#22c77a}
+.inp::placeholder{color:#333}
+.ag2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+
+/* Sliders */
+.slider-wrap{margin-top:8px}
+.rr{display:flex;align-items:center;gap:10px}
+.rv{font-size:28px;font-weight:700;font-family:'Courier New',monospace;color:#f59e3a;min-width:44px;text-align:right}
+.rv-red{color:#f06060}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:4px;background:rgba(255,255,255,0.08);cursor:pointer;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#f59e3a;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+input[type=range].red::-webkit-slider-thumb{background:#f06060}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#f59e3a;cursor:pointer;border:none}
+.range-labels{display:flex;justify-content:space-between;font-size:10px;color:#555d6a;margin-top:5px}
+
+/* Carte globale */
+.global-card{background:#1c2026;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px;margin-bottom:12px}
+textarea{width:100%;background:#111316;border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 14px;color:#f0f2f5;font-size:14px;resize:vertical;min-height:80px;font-family:inherit;outline:none}
+textarea:focus{border-color:#4f9cf9}
+
+/* Bouton valider */
+.sb{width:100%;background:#22c77a;color:#0b0d0f;border:none;border-radius:14px;padding:18px;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:.02em;transition:opacity .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.sb:active{transform:scale(.98)}
+.sb:disabled{opacity:.5;cursor:not-allowed}
+
+/* États */
+.screen-center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.recap-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.recap-item{background:#111316;border-radius:10px;padding:14px;text-align:center}
+.recap-v{font-size:26px;font-weight:700;font-family:'Courier New',monospace}
+.recap-l{font-size:10px;color:#8b929e;margin-top:3px}
+.exo-recap{background:#1c2026;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+@media(max-width:380px){
+  .ag2{grid-template-columns:1fr}
+  .pills{gap:6px}
+  .pill{padding:7px 6px}
+  .pill-v{font-size:14px}
+}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+const SUPA_URL = 'https://vexqpetksmagkfufanpu.supabase.co';
+const SUPA_KEY = 'sb_publishable_qfCOrYWrfwdx-j0VZCT6sw_tEfhfzk5';
+const SUPA_H   = {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY};
+
+const root = document.getElementById('root');
+
+function screen(html) {
+  root.innerHTML = '<div class="screen-center"><div style="text-align:center;max-width:360px;width:100%">'+html+'</div></div>';
+}
+
+function updateSlider(el, color) {
+  const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+  el.style.background = 'linear-gradient(to right,'+color+' 0%,'+color+' '+pct+'%,rgba(255,255,255,0.08) '+pct+'%,rgba(255,255,255,0.08) 100%)';
+}
+
+// ── Charger la session depuis Supabase ──
+async function loadSession() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('s');
+
+  if (!token) {
+    screen('<div style="font-size:48px;margin-bottom:20px">🔗</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Lien invalide</div><div style="font-size:13px;color:#8b929e">Demande un nouveau lien à ton kiné.</div>');
+    return;
+  }
+
+  screen('<div style="font-size:42px;margin-bottom:16px">⏳</div><div style="font-size:15px;color:#8b929e">Chargement de ta séance…</div>');
+
+  try {
+    const r = await fetch(SUPA_URL+'/rest/v1/kinetrack_data?id=eq.sess_'+token+'&select=data', {
+      headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const rows = await r.json();
+    if (!rows || !rows.length || !rows[0].data) {
+      screen('<div style="font-size:48px;margin-bottom:20px">❌</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Séance introuvable</div><div style="font-size:13px;color:#8b929e">Ce lien a peut-être expiré. Demande un nouveau lien à ton kiné.</div>');
+      return;
+    }
+    renderSession(rows[0].data);
+  } catch(e) {
+    console.error(e);
+    screen('<div style="font-size:48px;margin-bottom:20px">📶</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Problème de connexion</div><div style="font-size:13px;color:#8b929e;margin-bottom:20px">Vérifie ta connexion internet et réessaie.</div><button onclick="loadSession()" style="background:#4f9cf9;color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:14px;cursor:pointer;font-family:inherit">↺ Réessayer</button>');
+  }
+}
+
+// ── Afficher la séance ──
+function renderSession(data) {
+  const pN = {aigue:'Phase aiguë', renf:'Renforcement', reath:'Réathlétisation', rts:'Retour au sport'};
+  const dateStr = new Date(data.date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const prenom = (data.athleteNom||'').split(' ')[0];
+
+  let html = '<div class="aw">';
+
+  // En-tête
+  html += `<div class="ah">
+    <div class="badge">KineTrack · Séance</div>
+    <div style="font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px">Bonjour ${prenom} 👋</div>
+    <div style="font-size:13px;color:#8b929e;margin-bottom:${data.objectif?'10px':'0'};line-height:1.5">
+      ${dateStr}<br>${pN[data.phase]||data.phase} · ${data.dur} min
+    </div>
+    ${data.objectif ? `<div style="font-size:12px;color:#4f9cf9;background:rgba(79,156,249,0.08);border-radius:8px;padding:8px 10px;margin-top:8px">🎯 ${escHtml(data.objectif)}</div>` : ''}
+  </div>`;
+
+  // Exercices
+  (data.exercices||[]).forEach(function(e, i) {
+    const img = data.exoImages && data.exoImages[e.nom] ? data.exoImages[e.nom] : '';
+    html += `<div class="ec">
+      ${img ? `<img class="ec-img" src="${img}" alt="${escHtml(e.nom)}" loading="lazy">` : ''}
+      <div class="ec-body">
+        <div style="font-size:17px;font-weight:700;margin-bottom:12px">${i+1}. ${escHtml(e.nom)}</div>
+        <div class="pills">
+          <div class="pill"><div class="pill-v">${e.series}</div><div class="pill-l">Séries</div></div>
+          <div class="pill"><div class="pill-v">${e.reps}</div><div class="pill-l">Reps</div></div>
+          <div class="pill"><div class="pill-v">${e.charge ? e.charge+' kg' : 'Corps'}</div><div class="pill-l">Cible</div></div>
+          <div class="pill"><div class="pill-v">${e.repos}s</div><div class="pill-l">Repos</div></div>
+        </div>
+        ${e.desc ? `<div class="consigne">📋 ${escHtml(e.desc)}</div>` : ''}
+        ${e.video ? `<a href="${e.video}" target="_blank" rel="noopener" class="vid-btn">▶️ Voir la vidéo</a>` : ''}
+        <div class="ag2">
+          <div>
+            <label>Charge utilisée (kg)</label>
+            <input class="inp" type="number" id="xc-${i}" min="0" step="0.5"
+              inputmode="decimal" placeholder="${e.charge||'0'}">
+          </div>
+          <div>
+            <label>Difficulté (RPE)</label>
+            <div class="slider-wrap">
+              <div class="rr">
+                <input type="range" id="xr-${i}" min="1" max="10" value="5"
+                  oninput="updateSlider(this,'#f59e3a');document.getElementById('xrv-${i}').textContent=this.value;document.getElementById('xrh-${i}').value=this.value">
+                <div class="rv" id="xrv-${i}">5</div>
+                <input type="hidden" id="xrh-${i}" value="5">
+              </div>
+              <div class="range-labels"><span>Facile</span><span>Max</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  // Ressenti global
+  html += `<div class="global-card">
+    <div style="font-size:16px;font-weight:700;margin-bottom:20px">Ressenti global 💬</div>
+    <div style="margin-bottom:22px">
+      <label>Effort global (RPE 1–10)</label>
+      <div class="slider-wrap">
+        <div class="rr">
+          <input type="range" id="srpe" min="1" max="10" value="5"
+            oninput="updateSlider(this,'#f59e3a');document.getElementById('srpev').textContent=this.value;document.getElementById('srpeh').value=this.value">
+          <div class="rv" id="srpev">5</div>
+          <input type="hidden" id="srpeh" value="5">
+        </div>
+        <div class="range-labels"><span>Très facile</span><span>Maximal</span></div>
+      </div>
+    </div>
+    <div style="margin-bottom:22px">
+      <label>Douleur EVA (0 = aucune · 10 = insupportable)</label>
+      <div class="slider-wrap">
+        <div class="rr">
+          <input type="range" id="seva" min="0" max="10" value="0" class="red"
+            oninput="updateSlider(this,'#f06060');document.getElementById('sevav').textContent=this.value;document.getElementById('sevah').value=this.value">
+          <div class="rv rv-red" id="sevav">0</div>
+          <input type="hidden" id="sevah" value="0">
+        </div>
+        <div class="range-labels"><span>Aucune</span><span>Max</span></div>
+      </div>
+    </div>
+    <div>
+      <label>Commentaire (facultatif)</label>
+      <textarea id="scomment" placeholder="Sensations, difficultés, douleurs particulières…"></textarea>
+    </div>
+  </div>
+  <button class="sb" id="btn-submit">✓ Valider ma séance</button>
+  </div>`;
+
+  root.innerHTML = html;
+
+  // Init couleur sliders
+  ['srpe','seva'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) updateSlider(el, id==='seva'?'#f06060':'#f59e3a');
+  });
+  (data.exercices||[]).forEach(function(_,i) {
+    const el = document.getElementById('xr-'+i);
+    if (el) updateSlider(el,'#f59e3a');
+  });
+
+  document.getElementById('btn-submit').addEventListener('click', function() {
+    submitSession(data);
+  });
+}
+
+// ── Soumettre les données ──
+async function submitSession(data) {
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Envoi en cours…';
+
+  const exos = (data.exercices||[]).map(function(e,i) {
+    return {
+      nom: e.nom,
+      series: e.series,
+      reps: e.reps,
+      chargeCible: e.charge||0,
+      chargeReelle: parseFloat(document.getElementById('xc-'+i).value)||0,
+      rpeExo: parseInt(document.getElementById('xrh-'+i).value)||5
+    };
+  });
+  const rpeReel  = parseInt(document.getElementById('srpeh').value)||5;
+  const evaReel  = parseInt(document.getElementById('sevah').value)||0;
+  const comment  = document.getElementById('scomment').value.trim();
+  const cRT      = exos.reduce(function(a,e){return a+e.chargeReelle*e.series*e.reps;},0);
+  const chargeUA = Math.round(rpeReel * parseInt(data.dur||60));
+
+  var saved = false;
+  try {
+    // 1. Charger la DB live
+    const r = await fetch(SUPA_URL+'/rest/v1/kinetrack_data?id=eq.main&select=data', {
+      headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    if (r.ok) {
+      const rows = await r.json();
+      if (rows && rows.length && rows[0].data) {
+        const liveDB = rows[0].data;
+        const athlete = (liveDB.athletes||[]).find(function(p){ return p.id === data.athleteId; });
+        if (athlete) {
+          // Trouver la session par date
+          var session = athlete.sessions.find(function(s){ return s.date === data.date; });
+          if (!session) session = athlete.sessions.slice().reverse().find(function(s){
+            return s.rpeReel == null && s.exercices && s.exercices.length > 0;
+          });
+          if (session) {
+            session.rpeReel  = rpeReel;
+            session.eva      = evaReel;
+            session.charge   = chargeUA;
+            session.comment  = (session.comment ? session.comment+' · ' : '') + (comment||'Complétée par athlète');
+            exos.forEach(function(ex) {
+              var se = session.exercices.find(function(e){ return e.nom === ex.nom; });
+              if (se) { se.chargeReelle = ex.chargeReelle; se.rpeExo = ex.rpeExo; }
+            });
+            const rs = await fetch(SUPA_URL+'/rest/v1/kinetrack_data', {
+              method: 'POST',
+              headers: {...SUPA_H,'Prefer':'resolution=merge-duplicates,return=minimal'},
+              body: JSON.stringify({id:'main', data:liveDB, updated_at:new Date().toISOString()})
+            });
+            if (rs.ok) saved = true;
+          }
+        }
+      }
+    }
+  } catch(e) { console.warn('Submit error:', e); }
+
+  // Écran confirmation
+  const prenom = (data.athleteNom||'Athlète').split(' ')[0];
+  root.innerHTML = `<div class="aw">
+    <div style="text-align:center;padding:40px 0 28px">
+      <div style="font-size:72px;margin-bottom:16px">${saved?'🎉':'✅'}</div>
+      <h2 style="font-size:24px;font-weight:800;margin-bottom:8px;color:#22c77a">Séance validée !</h2>
+      <p style="color:#8b929e;font-size:14px;line-height:1.6;margin-bottom:28px">
+        Merci ${prenom}, tes données ont été ${saved ? 'envoyées à ton kiné ✓' : 'enregistrées'} !
+      </p>
+    </div>
+    <div style="background:#1c2026;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px;margin-bottom:12px">
+      <div style="font-size:10px;color:#555d6a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Récapitulatif</div>
+      <div class="recap-grid">
+        <div class="recap-item"><div class="recap-v" style="color:#22c77a">${rpeReel}/10</div><div class="recap-l">Effort global</div></div>
+        <div class="recap-item"><div class="recap-v" style="color:#f06060">${evaReel}/10</div><div class="recap-l">Douleur EVA</div></div>
+        <div class="recap-item"><div class="recap-v" style="color:#4f9cf9">${chargeUA} UA</div><div class="recap-l">Charge séance</div></div>
+        <div class="recap-item"><div class="recap-v" style="color:#f59e3a">${cRT>0?cRT+' kg':'Corps'}</div><div class="recap-l">Volume total</div></div>
+      </div>
+    </div>
+    ${exos.map(function(e){return `
+      <div class="exo-recap">
+        <span style="font-size:13px;font-weight:500">${escHtml(e.nom)}</span>
+        <span style="font-size:12px;color:#8b929e;white-space:nowrap">${e.chargeReelle?e.chargeReelle+' kg':'Corps'} · RPE ${e.rpeExo}</span>
+      </div>`;}).join('')}
+    <div style="background:${saved?'rgba(34,199,122,0.08)':'rgba(245,158,58,0.08)'};border:1px solid ${saved?'rgba(34,199,122,0.2)':'rgba(245,158,58,0.2)'};border-radius:10px;padding:12px 14px;font-size:12px;color:${saved?'#22c77a':'#f59e3a'};margin-top:12px">
+      ${saved ? '✓ Données synchronisées avec ton kiné' : '⚡ Connexion indisponible — réessaie plus tard'}
+    </div>
+  </div>`;
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Démarrage
+loadSession();
+</script>
+</body>
+</html>
