@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0b0d0f">
+<title>KineTrack — Ma séance</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0b0d0f;color:#f0f2f5;min-height:100vh;-webkit-text-size-adjust:100%}
+.aw{max-width:600px;margin:0 auto;padding:16px 14px 48px}
+
+/* Header séance */
+.ah{background:linear-gradient(135deg,#1a2535 0%,#1c2026 100%);border:1px solid rgba(79,156,249,0.2);border-radius:16px;padding:20px;margin-bottom:14px}
+.badge{display:inline-block;font-size:10px;font-weight:700;color:#22c77a;background:rgba(34,199,122,0.12);border:1px solid rgba(34,199,122,0.25);padding:3px 10px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+
+/* Carte exercice */
+.ec{background:#1c2026;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.ec-img{width:100%;max-height:220px;object-fit:cover;display:block}
+.ec-body{padding:16px}
+
+/* Pills infos */
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{background:#111316;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 10px;text-align:center;flex:1;min-width:56px}
+.pill-v{font-size:16px;font-weight:700;font-family:'Courier New',monospace;color:#4f9cf9}
+.pill-l{font-size:9px;color:#555d6a;text-transform:uppercase;margin-top:2px}
+
+/* Consigne */
+.consigne{font-size:12px;color:#8b929e;line-height:1.65;background:#111316;padding:10px 12px;border-radius:8px;margin-bottom:12px}
+.vid-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#0d1d2e;border:1px solid rgba(79,156,249,0.2);color:#4f9cf9;text-decoration:none;padding:11px;border-radius:8px;font-size:13px;margin-bottom:14px}
+
+/* Inputs */
+label{font-size:11px;color:#555d6a;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.inp{width:100%;background:#111316;border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px;color:#f0f2f5;font-size:22px;font-family:'Courier New',monospace;text-align:center;-webkit-appearance:none;transition:border-color .15s;outline:none}
+.inp:focus{border-color:#22c77a}
+.inp::placeholder{color:#333}
+.ag2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+
+/* Sliders */
+.slider-wrap{margin-top:8px}
+.rr{display:flex;align-items:center;gap:10px}
+.rv{font-size:28px;font-weight:700;font-family:'Courier New',monospace;color:#f59e3a;min-width:44px;text-align:right}
+.rv-red{color:#f06060}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:4px;background:rgba(255,255,255,0.08);cursor:pointer;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#f59e3a;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+input[type=range].red::-webkit-slider-thumb{background:#f06060}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#f59e3a;cursor:pointer;border:none}
+.range-labels{display:flex;justify-content:space-between;font-size:10px;color:#555d6a;margin-top:5px}
+
+/* Carte globale */
+.global-card{background:#1c2026;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px;margin-bottom:12px}
+textarea{width:100%;background:#111316;border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 14px;color:#f0f2f5;font-size:14px;resize:vertical;min-height:80px;font-family:inherit;outline:none}
+textarea:focus{border-color:#4f9cf9}
+
+/* Bouton valider */
+.sb{width:100%;background:#22c77a;color:#0b0d0f;border:none;border-radius:14px;padding:18px;font-size:17px;font-weight:800;cursor:pointer;letter-spacing:.02em;transition:opacity .15s,transform .1s;-webkit-tap-highlight-color:transparent}
+.sb:active{transform:scale(.98)}
+.sb:disabled{opacity:.5;cursor:not-allowed}
+
+/* États */
+.screen-center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.recap-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.recap-item{background:#111316;border-radius:10px;padding:14px;text-align:center}
+.recap-v{font-size:26px;font-weight:700;font-family:'Courier New',monospace}
+.recap-l{font-size:10px;color:#8b929e;margin-top:3px}
+.exo-recap{background:#1c2026;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+@media(max-width:380px){
+  .ag2{grid-template-columns:1fr}
+  .pills{gap:6px}
+  .pill{padding:7px 6px}
+  .pill-v{font-size:14px}
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+const SUPA_URL = 'https://vexqpetksmagkfufanpu.supabase.co';
+const SUPA_KEY = 'sb_publishable_qfCOrYWrfwdx-j0VZCT6sw_tEfhfzk5';
+const SUPA_H   = {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY};
+
+const root = document.getElementById('root');
+
+function screen(html) {
+  root.innerHTML = '<div class="screen-center"><div style="text-align:center;max-width:360px;width:100%">'+html+'</div></div>';
+}
+
+function updateSlider(el, color) {
+  const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+  el.style.background = 'linear-gradient(to right,'+color+' 0%,'+color+' '+pct+'%,rgba(255,255,255,0.08) '+pct+'%,rgba(255,255,255,0.08) 100%)';
+}
+
+// ── Charger la session depuis Supabase ──
+async function loadSession() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('s');
+
+  if (!token) {
+    screen('<div style="font-size:48px;margin-bottom:20px">🔗</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Lien invalide</div><div style="font-size:13px;color:#8b929e">Demande un nouveau lien à ton kiné.</div>');
+    return;
+  }
+
+  screen('<div style="font-size:42px;margin-bottom:16px">⏳</div><div style="font-size:15px;color:#8b929e">Chargement de ta séance…</div>');
+
+  try {
+    // Charger séance + historique en parallèle
+    const [sessR, histR] = await Promise.all([
+      fetch(SUPA_URL+'/rest/v1/kinetrack_data?id=eq.sess_'+token+'&select=data', {headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}}),
+      fetch(SUPA_URL+'/rest/v1/kinetrack_data?id=eq.main&select=data', {headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}})
+    ]);
+    if (!sessR.ok) throw new Error('HTTP '+sessR.status);
+    const sessRows = await sessR.json();
+    if (!sessRows || !sessRows.length || !sessRows[0].data) {
+      screen('<div style="font-size:48px;margin-bottom:20px">❌</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Séance introuvable</div><div style="font-size:13px;color:#8b929e">Ce lien a peut-être expiré. Demande un nouveau lien à ton kiné.</div>');
+      return;
+    }
+    const data = sessRows[0].data;
+    // Extraire l'historique des charges de l'athlète
+    let chargeHistory = {};
+    if (histR.ok) {
+      const histRows = await histR.json();
+      if (histRows && histRows.length && histRows[0].data) {
+        const liveDB = histRows[0].data;
+        const athlete = (liveDB.athletes||[]).find(function(p){ return p.id === data.athleteId; });
+        if (athlete) {
+          // Regrouper les dernières charges réelles par exercice
+          const sessions = (athlete.sessions||[]).slice().sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+          sessions.forEach(function(s) {
+            (s.exercices||[]).forEach(function(e) {
+              if (e.chargeReelle > 0) {
+                if (!chargeHistory[e.nom]) chargeHistory[e.nom] = [];
+                chargeHistory[e.nom].push({date: s.date, charge: e.chargeReelle, reps: e.reps, series: e.series});
+              }
+            });
+          });
+        }
+      }
+    }
+    data._chargeHistory = chargeHistory;
+    renderSession(data);
+  } catch(e) {
+    console.error(e);
+    screen('<div style="font-size:48px;margin-bottom:20px">📶</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Problème de connexion</div><div style="font-size:13px;color:#8b929e;margin-bottom:20px">Vérifie ta connexion internet et réessaie.</div><button onclick="loadSession()" style="background:#4f9cf9;color:#fff;border:none;border-radius:10px;padding:12px 24px;font-size:14px;cursor:pointer;font-family:inherit">↺ Réessayer</button>');
+  }
+}
+
+// ── Afficher la séance ──
+function renderSession(data) {
+  const pN = {aigue:'Phase aiguë', renf:'Renforcement', reath:'Réathlétisation', rts:'Retour au sport'};
+  const dateStr = new Date(data.date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const prenom = (data.athleteNom||'').split(' ')[0];
+
+  let html = '<div class="aw">';
+
+  // En-tête
+  html += `<div class="ah">
+    <div class="badge">KineTrack · Séance</div>
+    <div style="font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px">Bonjour ${prenom} 👋</div>
+    <div style="font-size:13px;color:#8b929e;margin-bottom:${data.objectif?'10px':'0'};line-height:1.5">
+      ${dateStr}<br>${pN[data.phase]||data.phase} · ${data.dur} min
+    </div>
+    ${data.objectif ? `<div style="font-size:12px;color:#4f9cf9;background:rgba(79,156,249,0.08);border-radius:8px;padding:8px 10px;margin-top:8px">🎯 ${escHtml(data.objectif)}</div>` : ''}
+  </div>`;
+
+  // Exercices
+  (data.exercices||[]).forEach(function(e, i) {
+    const img = data.exoImages && data.exoImages[e.nom] ? data.exoImages[e.nom] : '';
+    const isLibre = e.chargeLibre || e.charge === -1;
+    const hist = (data._chargeHistory && data._chargeHistory[e.nom]) || [];
+    const lastEntry = hist.length ? hist[hist.length-1] : null;
+    const last3 = hist.slice(-3).reverse();
+    const refCharge = isLibre ? (lastEntry ? lastEntry.charge : 0) : (e.charge > 0 ? e.charge : (lastEntry ? lastEntry.charge : 0));
+
+    // Zones d'intensité
+    let zonesHtml = '';
+    if (refCharge > 0) {
+      const rm1 = lastEntry ? Math.round(lastEntry.charge * (1 + lastEntry.reps/30)) : Math.round(refCharge * (1 + (e.reps||10)/30));
+      if (rm1 > 0) {
+        const zones = [
+          {label:'Speed', pct:'<50%', min:0, max:Math.round(rm1*.50), reps:'>30', color:'#a78bfa'},
+          {label:'Strength endurance', pct:'50–65%', min:Math.round(rm1*.50), max:Math.round(rm1*.65), reps:'8→30', color:'#22c77a'},
+          {label:'Power', pct:'60–75%', min:Math.round(rm1*.60), max:Math.round(rm1*.75), reps:'4→14', color:'#4f9cf9'},
+          {label:'Hypertrophy', pct:'65–80%', min:Math.round(rm1*.65), max:Math.round(rm1*.80), reps:'6→12', color:'#f59e3a'},
+          {label:'Maximal Strength', pct:'80–100%', min:Math.round(rm1*.80), max:rm1, reps:'1→8', color:'#f06060'},
+        ];
+        const rirTip = (e.rir!==undefined&&e.rir!=='') ? '<div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#a78bfa">🎯 Objectif : '+e.rir+' RIR en réserve</div>' : '';
+        zonesHtml = '<div style="margin-bottom:12px"><div style="font-size:10px;color:#555d6a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">1RM estimé ~'+rm1+' kg · Zones d\'intensité</div>'+rirTip+zones.map(function(z){return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><div style="width:3px;height:28px;border-radius:2px;background:'+z.color+';flex-shrink:0"></div><div><div style="font-size:11px;font-weight:600;color:'+z.color+'">'+z.label+' <span style="color:#555d6a;font-weight:400">('+z.pct+')</span></div><div style="font-size:10px;color:#8b929e">'+z.min+'–'+z.max+' kg · '+z.reps+' reps</div></div></div>';}).join('')+'</div>';
+      }
+    }
+
+    // Dernières charges
+    const histHtml = last3.length ? '<div style="background:#111316;border-radius:8px;padding:8px 10px;margin-bottom:10px"><div style="font-size:10px;color:#555d6a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Tes dernières séances</div>'+last3.map(function(h){const d=new Date(h.date+'T12:00:00');const df=d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});return '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><span style="font-size:11px;color:#8b929e">'+df+'</span><span style="font-size:12px;font-weight:600;font-family:Courier New,monospace;color:#f59e3a">'+h.charge+' kg × '+h.series+'×'+h.reps+'</span></div>';}).join('')+'</div>' : '';
+
+    html += `<div class="ec">
+      ${img ? `<img class="ec-img" src="${img}" alt="${escHtml(e.nom)}" loading="lazy">` : ''}
+      <div class="ec-body">
+        <div style="font-size:17px;font-weight:700;margin-bottom:12px">${i+1}. ${escHtml(e.nom)}</div>
+        <div class="pills">
+          <div class="pill"><div class="pill-v">${e.series}</div><div class="pill-l">Séries</div></div>
+          <div class="pill"><div class="pill-v">${e.reps}</div><div class="pill-l">Reps</div></div>
+          ${e.rir!==undefined&&e.rir!==''?`<div class="pill"><div class="pill-v" style="color:#a78bfa">${e.rir} RIR</div><div class="pill-l">Réserve</div></div>`:''}
+          <div class="pill"><div class="pill-v" style="color:${isLibre?'#f59e3a':'#4f9cf9'};font-size:${isLibre?'11px':'16px'}">${isLibre?'Libre':(e.charge>0?e.charge+' kg':'Corps')}</div><div class="pill-l">Cible</div></div>
+          <div class="pill"><div class="pill-v">${e.repos}s</div><div class="pill-l">Repos</div></div>
+        </div>
+        ${e.desc ? `<div class="consigne">📋 ${escHtml(e.desc)}</div>` : ''}
+        ${e.video ? `<a href="${e.video}" target="_blank" rel="noopener" class="vid-btn">▶️ Voir la vidéo</a>` : ''}
+        ${histHtml}${zonesHtml}
+        <div class="ag2">
+        ${e.isIso ? `<div style="margin-bottom:12px">
+          <button onclick="startIsoTimer(${e.reps||30},'${escHtml(e.nom)}')"
+            style="width:100%;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px">
+            ⏱ Démarrer le timer — ${e.reps||30} sec
+          </button>
+        </div>` : ''}
+          <div>
+            <label>Charge utilisée (kg)</label>
+            <input class="inp" type="number" id="xc-${i}" min="0" step="0.5"
+              inputmode="decimal" placeholder="${isLibre?'Libre':(e.charge>0?e.charge:'')}">
+          </div>
+          <div>
+            <label>Difficulté (RPE)</label>
+            <div class="slider-wrap">
+              <div class="rr">
+                <input type="range" id="xr-${i}" min="1" max="10" value="5"
+                  oninput="updateSlider(this,'#f59e3a');document.getElementById('xrv-${i}').textContent=this.value;document.getElementById('xrh-${i}').value=this.value">
+                <div class="rv" id="xrv-${i}">5</div>
+                <input type="hidden" id="xrh-${i}" value="5">
+              </div>
+              <div class="range-labels"><span>Facile</span><span>Max</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- Bouton chrono repos -->
+        <div style="margin-top:10px">
+          <button onclick="startRestChrono(${e.repos||60},'Repos après ${escHtml(e.nom)}')"
+            style="width:100%;background:rgba(34,199,122,0.08);border:1px solid rgba(34,199,122,0.2);color:#22c77a;border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px">
+            ⏱ Chrono repos — ${e.repos||60} sec
+          </button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  // Ressenti global
+  html += `<div class="global-card">
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px">Ressenti global 💬</div>
+
+    <!-- Chrono séance affiché en haut -->
+    <div id="session-timer-box" style="background:#111316;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:28px;font-weight:800;font-family:Courier New,monospace;color:#4f9cf9;min-width:60px" id="session-timer-display">0:00</div>
+      <div style="flex:1">
+        <div style="font-size:11px;color:#555d6a;text-transform:uppercase;letter-spacing:.06em">Durée de la séance</div>
+        <div style="font-size:11px;color:#8b929e;margin-top:2px" id="session-timer-status">Chrono en cours…</div>
+      </div>
+      <div style="width:8px;height:8px;border-radius:50%;background:#22c77a;animation:pulse 1.5s infinite" id="session-timer-dot"></div>
+    </div>
+
+    <div style="margin-bottom:22px">
+      <label>Effort global (RPE 1–10)</label>
+      <div style="font-size:11px;color:#555d6a;margin-bottom:8px">Ajuste le slider → la durée et la charge UA se calculent automatiquement</div>
+      <div class="slider-wrap">
+        <div class="rr">
+          <input type="range" id="srpe" min="1" max="10" value="5"
+            oninput="updateSlider(this,'#f59e3a');document.getElementById('srpev').textContent=this.value;document.getElementById('srpeh').value=this.value;onRpeChange()">
+          <div class="rv" id="srpev">5</div>
+          <input type="hidden" id="srpeh" value="5">
+        </div>
+        <div class="range-labels"><span>Très facile</span><span>Maximal</span></div>
+      </div>
+    </div>
+    <div style="margin-bottom:22px">
+      <label>Douleur EVA (0 = aucune · 10 = insupportable)</label>
+      <div class="slider-wrap">
+        <div class="rr">
+          <input type="range" id="seva" min="0" max="10" value="0" class="red"
+            oninput="updateSlider(this,'#f06060');document.getElementById('sevav').textContent=this.value;document.getElementById('sevah').value=this.value;onEvaChange()">
+          <div class="rv rv-red" id="sevav">0</div>
+          <input type="hidden" id="sevah" value="0">
+        </div>
+        <div class="range-labels"><span>Aucune</span><span>Max</span></div>
+      </div>
+    </div>
+    <div style="margin-bottom:22px">
+      <label>Durée séance <span id="sdur-auto-label" style="color:#22c77a;font-size:10px"></span></label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input class="inp" type="text" id="sdur" inputmode="numeric" placeholder="auto (mm:ss)" style="font-size:18px;flex:1">
+        <span style="font-size:11px;color:#555d6a">min</span>
+      </div>
+      <div id="charge-ua-preview" style="margin-top:6px;font-size:11px;color:#4f9cf9"></div>
+    </div>
+    <div>
+      <label>Commentaire (facultatif)</label>
+      <textarea id="scomment" placeholder="Sensations, difficultés, douleurs particulières…"></textarea>
+    </div>
+  </div>
+  <button class="sb" id="btn-submit">✓ Valider ma séance</button>
+  </div>
+
+  <!-- Chrono flottant repos -->
+  <div id="chrono-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:none;align-items:center;justify-content:center;flex-direction:column">
+    <div style="text-align:center;padding:32px">
+      <div id="chrono-label" style="font-size:14px;color:#8b929e;margin-bottom:12px">Repos</div>
+      <div id="chrono-time" style="font-size:80px;font-weight:800;font-family:Courier New,monospace;color:#f59e3a;line-height:1;letter-spacing:-2px">0:00</div>
+      <div id="chrono-bar-wrap" style="width:260px;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;margin:20px auto">
+        <div id="chrono-bar" style="height:100%;border-radius:4px;background:#f59e3a;transition:width .5s;width:100%"></div>
+      </div>
+      <div id="chrono-status" style="font-size:13px;color:#8b929e;margin-bottom:24px"></div>
+      <button onclick="stopChrono()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:12px;padding:14px 32px;font-size:15px;cursor:pointer;font-family:inherit">⏹ Arrêter</button>
+    </div>
+  </div>`;
+
+  root.innerHTML = html;
+
+  // Init couleur sliders
+  ['srpe','seva'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) updateSlider(el, id==='seva'?'#f06060':'#f59e3a');
+  });
+  (data.exercices||[]).forEach(function(_,i) {
+    const el = document.getElementById('xr-'+i);
+    if (el) updateSlider(el,'#f59e3a');
+  });
+
+  // Init chronos repos et timers isométrie
+  initChronos(data.exercices||[]);
+
+  document.getElementById('btn-submit').addEventListener('click', function() {
+    submitSession(data);
+  });
+}
+
+// ── Utilitaires réseau ──
+function fetchWithTimeout(url, options, ms) {
+  const ctrl = new AbortController();
+  const id = setTimeout(function(){ ctrl.abort(); }, ms);
+  return fetch(url, Object.assign({}, options, {signal: ctrl.signal}))
+    .finally(function(){ clearTimeout(id); });
+}
+
+async function retryFetch(url, options, timeout, attempts) {
+  for (var i = 0; i < attempts; i++) {
+    try {
+      var r = await fetchWithTimeout(url, options, timeout);
+      if (r.ok) return r;
+    } catch(e) {
+      if (i === attempts - 1) throw e;
+      // Délai exponentiel : 1s, 2s, 4s
+      await new Promise(function(res){ setTimeout(res, 1000 * Math.pow(2, i)); });
+    }
+  }
+  throw new Error('Toutes les tentatives ont échoué');
+}
+
+// ── Sauvegarde locale de secours ──
+function saveLocally(payload) {
+  try {
+    var pending = JSON.parse(localStorage.getItem('kt_pending')||'[]');
+    pending.push(payload);
+    localStorage.setItem('kt_pending', JSON.stringify(pending));
+  } catch(e) {}
+}
+
+async function flushPending() {
+  try {
+    var pending = JSON.parse(localStorage.getItem('kt_pending')||'[]');
+    if (!pending.length) return;
+    // Tenter de renvoyer chaque entrée en attente
+    for (var i = pending.length - 1; i >= 0; i--) {
+      try {
+        var r = await fetchWithTimeout(SUPA_URL+'/rest/v1/kinetrack_data', {
+          method: 'POST',
+          headers: Object.assign({}, SUPA_H, {'Prefer':'resolution=merge-duplicates,return=minimal'}),
+          body: JSON.stringify(pending[i])
+        }, 10000);
+        if (r.ok) pending.splice(i, 1);
+      } catch(e) {}
+    }
+    localStorage.setItem('kt_pending', JSON.stringify(pending));
+  } catch(e) {}
+}
+
+// ── Soumettre les données ──
+async function submitSession(data) {
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '⏳ Envoi en cours…';
+
+  const exos = (data.exercices||[]).map(function(e,i) {
+    return {
+      nom: e.nom,
+      series: e.series,
+      reps: e.reps,
+      chargeCible: e.charge||0,
+      chargeReelle: parseFloat(document.getElementById('xc-'+i).value)||0,
+      rpeExo: parseInt(document.getElementById('xrh-'+i).value)||5
+    };
+  });
+  const rpeReel  = parseInt(document.getElementById('srpeh').value)||5;
+  const evaReel  = parseInt(document.getElementById('sevah').value)||0;
+  // Durée : priorité dataset.seconds (capturé par stopSessionTimer), sinon champ, sinon chrono live
+  const sdurEl = document.getElementById('sdur');
+  var durSecs = 0;
+  if (sdurEl && sdurEl.dataset.seconds && sdurEl.dataset.seconds !== '0') {
+    durSecs = parseInt(sdurEl.dataset.seconds) || 0;
+  } else if (sdurEl && sdurEl.value) {
+    var v = sdurEl.value.trim();
+    if (v.includes(':')) { var p=v.split(':'); durSecs=parseInt(p[0]||0)*60+parseInt(p[1]||0); }
+    else durSecs = parseInt(v||0)*60;
+  }
+  if (!durSecs && _sessionStart) {
+    durSecs = Math.floor((Date.now() - _sessionStart) / 1000);
+  }
+  if (!durSecs) durSecs = _sessionSeconds || 60;
+  const durReel = Math.max(1, Math.round(durSecs/60));
+  const comment  = document.getElementById('scomment').value.trim();
+  stopSessionTimer();
+  const cRT      = exos.reduce(function(a,e){return a+e.chargeReelle*e.series*e.reps;},0);
+  const chargeUA = Math.round(rpeReel * (durSecs/60));
+
+  var saved = false;
+  var errorMsg = '';
+
+  // Tenter d'abord de renvoyer les données en attente
+  await flushPending();
+
+  try {
+    btn.textContent = '⏳ Connexion…';
+    // 1. Charger la DB live — 3 tentatives, timeout 10s chacune
+    const r = await retryFetch(
+      SUPA_URL+'/rest/v1/kinetrack_data?id=eq.main&select=data',
+      {headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}},
+      10000, 3
+    );
+
+    const rows = await r.json();
+    if (rows && rows.length && rows[0].data) {
+      const liveDB = rows[0].data;
+      const athlete = (liveDB.athletes||[]).find(function(p){ return p.id === data.athleteId; });
+      if (athlete) {
+        var session = athlete.sessions.find(function(s){ return s.date === data.date; });
+        if (!session) session = athlete.sessions.slice().reverse().find(function(s){
+          return s.rpeReel == null && s.exercices && s.exercices.length > 0;
+        });
+        if (session) {
+          session.rpeReel = rpeReel;
+          session.eva     = evaReel;
+          if (durReel > 0) session.dur = durReel;
+          // Charge UA = RPE × durée (Foster) — correct poids de corps et iso
+          session.charge  = chargeUA;
+          session.comment = (session.comment ? session.comment+' · ' : '') + (comment||'Complétée par athlète');
+          exos.forEach(function(ex) {
+            var se = session.exercices.find(function(e){ return e.nom === ex.nom; });
+            if (se) { se.chargeReelle = ex.chargeReelle; se.rpeExo = ex.rpeExo; }
+          });
+
+          btn.textContent = '⏳ Sauvegarde…';
+          const payload = {id:'main', data:liveDB, updated_at:new Date().toISOString()};
+          // 2. Sauvegarder — 3 tentatives, timeout 10s chacune
+          const rs = await retryFetch(
+            SUPA_URL+'/rest/v1/kinetrack_data',
+            {method:'POST', headers:Object.assign({},SUPA_H,{'Prefer':'resolution=merge-duplicates,return=minimal'}), body:JSON.stringify(payload)},
+            10000, 3
+          );
+          if (rs.ok) saved = true;
+        } else {
+          errorMsg = 'Séance introuvable dans la base.';
+        }
+      } else {
+        errorMsg = 'Athlète introuvable.';
+      }
+    }
+  } catch(e) {
+    console.warn('Submit error:', e);
+    // Sauvegarder localement pour retry ultérieur
+    errorMsg = 'Connexion instable — tes données sont sauvegardées localement.';
+  }
+
+  // Écran confirmation
+  const prenom = (data.athleteNom||'Athlète').split(' ')[0];
+  const successBlock = `
+    <div style="background:rgba(34,199,122,0.08);border:1px solid rgba(34,199,122,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:#22c77a;margin-top:12px">
+      ✓ Données synchronisées avec ton kiné
+    </div>`;
+  const failBlock = `
+    <div style="background:rgba(245,158,58,0.08);border:1px solid rgba(245,158,58,0.2);border-radius:10px;padding:14px;font-size:12px;color:#f59e3a;margin-top:12px;line-height:1.6">
+      ⚡ ${errorMsg||'Connexion indisponible'}<br>
+      <button onclick="retrySubmit()" style="margin-top:10px;background:#f59e3a;color:#0b0d0f;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%">
+        ↺ Réessayer l'envoi
+      </button>
+    </div>`;
+
+  // Stocker les données pour le retry si nécessaire
+  if (!saved) window._pendingSubmit = {data, exos, rpeReel, evaReel, durReel, comment, chargeUA, cRT};
+
+  root.innerHTML = `<div class="aw">
+    <div style="text-align:center;padding:40px 0 28px">
+      <div style="font-size:72px;margin-bottom:16px">${saved?'🎉':'⚠️'}</div>
+      <h2 style="font-size:24px;font-weight:800;margin-bottom:8px;color:${saved?'#22c77a':'#f59e3a'}">${saved?'Séance validée !':'Données enregistrées'}</h2>
+      <p style="color:#8b929e;font-size:14px;line-height:1.6;margin-bottom:28px">
+        ${saved ? `Merci ${prenom}, tes données ont été envoyées à ton kiné ✓` : `Tes données sont prêtes — appuie sur Réessayer dès que tu as du réseau.`}
+      </p>
+    </div>
+    <div style="background:#1c2026;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px;margin-bottom:12px">
+      <div style="font-size:10px;color:#555d6a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Récapitulatif</div>
+      <div class="recap-grid">
+        <div class="recap-item"><div class="recap-v" style="color:#22c77a">${rpeReel}/10</div><div class="recap-l">Effort global</div></div>
+        <div class="recap-item"><div class="recap-v" style="color:#f06060">${evaReel}/10</div><div class="recap-l">Douleur EVA</div></div>
+        <div class="recap-item"><div class="recap-v" style="color:#4f9cf9">${chargeUA} UA</div><div class="recap-l">Charge séance</div></div>
+        <div class="recap-item"><div class="recap-v" style="color:#f59e3a">${cRT>0?cRT+' kg':'Corps'}</div><div class="recap-l">Volume total</div></div>
+      </div>
+    </div>
+    ${exos.map(function(e){return `
+      <div class="exo-recap">
+        <span style="font-size:13px;font-weight:500">${escHtml(e.nom)}</span>
+        <span style="font-size:12px;color:#8b929e;white-space:nowrap">${e.chargeReelle?e.chargeReelle+' kg':'Corps'} · RPE ${e.rpeExo}</span>
+      </div>`;}).join('')}
+    ${saved ? successBlock : failBlock}
+  </div>`;
+}
+
+async function retrySubmit() {
+  const p = window._pendingSubmit;
+  if (!p) return;
+  const btn = document.querySelector('button[onclick="retrySubmit()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Nouvelle tentative…'; }
+  try {
+    const r = await retryFetch(
+      SUPA_URL+'/rest/v1/kinetrack_data?id=eq.main&select=data',
+      {headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}},
+      10000, 3
+    );
+    const rows = await r.json();
+    if (rows && rows.length && rows[0].data) {
+      const liveDB = rows[0].data;
+      const athlete = (liveDB.athletes||[]).find(function(a){ return a.id === p.data.athleteId; });
+      if (athlete) {
+        var session = athlete.sessions.find(function(s){ return s.date === p.data.date; });
+        if (!session) session = athlete.sessions.slice().reverse().find(function(s){ return s.rpeReel == null && s.exercices && s.exercices.length > 0; });
+        if (session) {
+          session.rpeReel = p.rpeReel; session.eva = p.evaReel;
+          if (p.durReel > 0) session.dur = p.durReel;
+          session.charge = p.chargeUA;
+          session.comment = (session.comment ? session.comment+' · ' : '') + (p.comment||'Complétée par athlète');
+          p.exos.forEach(function(ex){ var se = session.exercices.find(function(e){ return e.nom===ex.nom; }); if(se){se.chargeReelle=ex.chargeReelle;se.rpeExo=ex.rpeExo;} });
+          const rs = await retryFetch(SUPA_URL+'/rest/v1/kinetrack_data',
+            {method:'POST',headers:Object.assign({},SUPA_H,{'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify({id:'main',data:liveDB,updated_at:new Date().toISOString()})},
+            10000, 3);
+          if (rs.ok) {
+            window._pendingSubmit = null;
+            // Mettre à jour le bloc de statut
+            const statusEl = document.querySelector('.retry-status');
+            if (statusEl) statusEl.outerHTML = '<div style="background:rgba(34,199,122,0.08);border:1px solid rgba(34,199,122,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:#22c77a;margin-top:12px">✓ Données synchronisées avec ton kiné</div>';
+            return;
+          }
+        }
+      }
+    }
+  } catch(e) {}
+  if (btn) { btn.disabled = false; btn.textContent = '↺ Réessayer l\'envoi'; }
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Bip Web Audio ──
+var _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) {
+    try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  return _audioCtx;
+}
+function playBeep(freq, dur, vol, delay) {
+  var ctx = getAudioCtx(); if (!ctx) return;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.frequency.value = freq || 880;
+  osc.type = 'sine';
+  gain.gain.setValueAtTime(0, ctx.currentTime + (delay||0));
+  gain.gain.linearRampToValueAtTime(vol||0.4, ctx.currentTime + (delay||0) + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (delay||0) + (dur||0.15));
+  osc.start(ctx.currentTime + (delay||0));
+  osc.stop(ctx.currentTime + (delay||0) + (dur||0.15) + 0.01);
+}
+function playEndBeep() {
+  // 3 bips courts montants
+  playBeep(660, 0.12, 0.4, 0);
+  playBeep(880, 0.12, 0.4, 0.18);
+  playBeep(1100, 0.25, 0.5, 0.36);
+}
+function playCountdownBeep() {
+  // 1 bip grave pour les 3 dernières secondes
+  playBeep(440, 0.1, 0.3, 0);
+}
+
+// ── Chrono global séance ──
+var _sessionStart = null;
+var _sessionInterval = null;
+var _sessionSeconds = 0;
+var _rpeFirstTouch = false;
+var _evaFirstTouch = false;
+
+function startSessionTimer() {
+  _sessionStart = Date.now();
+  _sessionSeconds = 0;
+  _sessionInterval = setInterval(function() {
+    if (!_sessionStart) return;
+    _sessionSeconds = Math.floor((Date.now() - _sessionStart) / 1000);
+    var min = Math.floor(_sessionSeconds / 60);
+    var sec = _sessionSeconds % 60;
+    var disp = document.getElementById('session-timer-display');
+    if (disp) disp.textContent = min + ':' + (sec < 10 ? '0' : '') + sec;
+  }, 500); // tick toutes les 500ms pour plus de réactivité
+}
+
+function stopSessionTimer() {
+  // Capturer les secondes exactes au moment de l'arrêt
+  if (_sessionStart) {
+    _sessionSeconds = Math.floor((Date.now() - _sessionStart) / 1000);
+  }
+  if (_sessionInterval) { clearInterval(_sessionInterval); _sessionInterval = null; }
+  var dot = document.getElementById('session-timer-dot');
+  if (dot) { dot.style.animation = 'none'; dot.style.background = '#555d6a'; }
+  var status = document.getElementById('session-timer-status');
+  if (status) status.textContent = 'Séance terminée — ' + Math.floor(_sessionSeconds/60) + 'min ' + (_sessionSeconds%60) + 's';
+}
+
+function getSessionMinutes() {
+  // Toujours calculer depuis _sessionStart si le timer tourne encore
+  var secs;
+  if (_sessionStart && _sessionInterval) {
+    secs = Math.floor((Date.now() - _sessionStart) / 1000);
+  } else {
+    secs = _sessionSeconds || (_sessionStart ? Math.floor((Date.now() - _sessionStart) / 1000) : 0);
+  }
+  return secs / 60;
+}
+
+function onRpeChange() {
+  // Arrêter le chrono dès le premier touch RPE — capture les secondes exactes
+  if (!_rpeFirstTouch) {
+    _rpeFirstTouch = true;
+    stopSessionTimer(); // stopSessionTimer capture _sessionSeconds au moment précis
+  }
+  var secs = _sessionSeconds || Math.floor((Date.now() - (_sessionStart||Date.now())) / 1000);
+  var min = Math.floor(secs / 60);
+  var sec = secs % 60;
+  var sdurEl = document.getElementById('sdur');
+  if (sdurEl && !sdurEl.dataset.manual) {
+    sdurEl.value = min + ':' + (sec < 10 ? '0' : '') + sec;
+    sdurEl.dataset.seconds = String(secs);
+    var lbl = document.getElementById('sdur-auto-label');
+    if (lbl) lbl.textContent = '— mesuré automatiquement';
+  }
+  updateChargePreview();
+}
+
+function onEvaChange() {
+  _evaFirstTouch = true;
+  updateChargePreview();
+}
+
+function updateChargePreview() {
+  var rpe = parseInt((document.getElementById('srpeh')||{}).value) || 5;
+  var sdurEl = document.getElementById('sdur');
+  var secs = 0;
+  if (sdurEl && sdurEl.dataset.seconds && sdurEl.dataset.seconds !== '0') {
+    secs = parseInt(sdurEl.dataset.seconds) || 0;
+  } else if (sdurEl && sdurEl.value) {
+    var v = sdurEl.value.trim();
+    if (v.includes(':')) {
+      var parts = v.split(':');
+      secs = parseInt(parts[0]||0)*60 + parseInt(parts[1]||0);
+    } else {
+      secs = parseInt(v||0) * 60;
+    }
+  }
+  if (!secs) {
+    // Fallback : chrono en cours
+    secs = _sessionSeconds || (_sessionStart ? Math.floor((Date.now()-_sessionStart)/1000) : 0);
+  }
+  var durMin = secs / 60;
+  var ua = Math.round(rpe * durMin);
+  var el = document.getElementById('charge-ua-preview');
+  if (el) {
+    if (ua > 0) {
+      var minA = Math.floor(secs/60), secA = secs%60;
+      el.textContent = '→ Charge UA : ' + ua + ' (' + rpe + ' RPE × ' + minA + 'min' + (secA>0?' '+secA+'s':'') + ')';
+    } else {
+      el.textContent = '';
+    }
+  }
+}
+
+function initChronos(exercices) {
+  // Marquer le champ durée comme manuel si l'athlète le touche
+  setTimeout(function() {
+    var sdurEl = document.getElementById('sdur');
+    if (sdurEl) sdurEl.addEventListener('input', function() {
+      this.dataset.manual = '1';
+      var lbl = document.getElementById('sdur-auto-label');
+      if (lbl) lbl.textContent = '— modifié manuellement';
+      updateChargePreview();
+    });
+  }, 100);
+  startSessionTimer();
+}
+
+// ── Chronos repos et iso ──
+var _chronoInterval = null;
+
+function showChronoOverlay(label, totalSec, countDown) {
+  const ov = document.getElementById('chrono-overlay');
+  const lbl = document.getElementById('chrono-label');
+  const timeEl = document.getElementById('chrono-time');
+  const bar = document.getElementById('chrono-bar');
+  const status = document.getElementById('chrono-status');
+  if (!ov) return;
+  // Débloquer AudioContext sur interaction utilisateur
+  getAudioCtx();
+  ov.style.display = 'flex';
+  lbl.textContent = label;
+  if (_chronoInterval) clearInterval(_chronoInterval);
+  var elapsed = 0;
+  function fmtT(s) { return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
+  function tick() {
+    elapsed++;
+    var remain = countDown ? Math.max(0, totalSec - elapsed) : elapsed;
+    timeEl.textContent = fmtT(remain);
+    if (countDown && bar) bar.style.width = Math.max(0,(totalSec-elapsed)/totalSec*100)+'%';
+    // Bips décompte sur les 3 dernières secondes
+    if (countDown && remain > 0 && remain <= 3) playCountdownBeep();
+    // Bip final
+    if (countDown && elapsed >= totalSec) {
+      clearInterval(_chronoInterval);
+      timeEl.textContent = '0:00';
+      timeEl.style.color = '#22c77a';
+      status.textContent = '✓ Terminé !';
+      if (bar) { bar.style.width = '0%'; bar.style.background = '#22c77a'; }
+      playEndBeep();
+      try { if('vibrate' in navigator) navigator.vibrate([300,100,300]); } catch(_){}
+    }
+  }
+  timeEl.style.color = countDown ? '#f59e3a' : '#a78bfa';
+  if (bar) { bar.style.width = '100%'; bar.style.background = countDown ? '#f59e3a' : '#a78bfa'; }
+  status.textContent = countDown ? 'Temps restant' : 'En cours…';
+  timeEl.textContent = countDown ? fmtT(totalSec) : '0:00';
+  _chronoInterval = setInterval(tick, 1000);
+}
+
+function stopChrono() {
+  if (_chronoInterval) { clearInterval(_chronoInterval); _chronoInterval = null; }
+  const ov = document.getElementById('chrono-overlay');
+  if (ov) ov.style.display = 'none';
+}
+
+function startRestChrono(sec, label) {
+  showChronoOverlay('⏸ ' + label, sec, true);
+}
+
+function startIsoTimer(sec, nom) {
+  showChronoOverlay('💪 ' + nom, sec, true);
+}
+
+function initChronos(exercices) {
+  // Rien à initialiser — les boutons sont dans le HTML
+}
+
+// Démarrage
+loadSession();
+</script>
+</body>
+</html>
